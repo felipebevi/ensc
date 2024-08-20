@@ -40,52 +40,57 @@
     </div>
 
     <script>
-        // Subdiretórios de fotos
+        const repoOwner = "felipebevi";
+        const repoName = "ensc";
+        const branch = "main";
         const photoDirs = ["11do11", "12do11", "17do11", "19do11", "3do11", "4do11", "5do11", "ViagemFormatura", "fotos1", "fotos2", "fotos3", "hopihari", "niverthassia", "sitioevaldo", "sitioosmar"];
+        const basePathPhotos = "vcd/FOTOS/";
+        const basePathVideos = "vcd/VIDEOS/";
 
-        // Caminho base do projeto
-        const basePath = "vcd/";
+        function fetchFilesFromGitHub(path, callback) {
+            const apiURL = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${path}?ref=${branch}`;
+            $.getJSON(apiURL, function(data) {
+                if (Array.isArray(data)) {
+                    callback(data);
+                } else {
+                    console.error("Erro ao carregar os arquivos do GitHub:", data);
+                }
+            });
+        }
 
         // Carregar fotos dinamicamente
         $.each(photoDirs, function(index, dir) {
-            $.ajax({
-                url: `${basePath}FOTOS/${dir}`,
-                success: function(data) {
-                    $(data).find("a").each(function() {
-                        let fileName = $(this).attr("href");
-                        if (fileName.match(/\.(jpe?g|png|gif)$/i)) {
-                            $('#photo-gallery').append(`
-                                <div class="col-lg-3 col-md-4 col-sm-6 gallery-item">
-                                    <img src="${basePath}FOTOS/${dir}/${fileName}" class="img-fluid" alt="${fileName}">
-                                </div>
-                            `);
-                        }
-                    });
-                }
-            });
-        });
-
-        // Carregar vídeos dinamicamente
-        $.ajax({
-            url: `${basePath}VIDEOS/`,
-            success: function(data) {
-                $(data).find("a").each(function() {
-                    let fileName = $(this).attr("href");
-                    if (fileName.match(/\.(mp4|avi|mpg|mpeg)$/i)) {
-                        $('#video-gallery').append(`
-                            <div class="col-lg-4 col-md-6 col-sm-12 gallery-item">
-                                <video controls>
-                                    <source src="${basePath}VIDEOS/${fileName}" type="video/mp4">
-                                    Seu navegador não suporta a reprodução de vídeos.
-                                </video>
+            fetchFilesFromGitHub(`${basePathPhotos}${dir}`, function(files) {
+                $.each(files, function(i, file) {
+                    if (file.name.match(/\.(jpe?g|png|gif)$/i)) {
+                        $('#photo-gallery').append(`
+                            <div class="col-lg-3 col-md-4 col-sm-6 gallery-item">
+                                <img src="${file.download_url}" class="img-fluid" alt="${file.name}">
                             </div>
                         `);
                     }
                 });
-            }
+            });
+        });
+
+        // Carregar vídeos dinamicamente
+        fetchFilesFromGitHub(basePathVideos, function(files) {
+            $.each(files, function(i, file) {
+                if (file.name.match(/\.(mp4|avi|mpg|mpeg)$/i)) {
+                    $('#video-gallery').append(`
+                        <div class="col-lg-4 col-md-6 col-sm-12 gallery-item">
+                            <video controls>
+                                <source src="${file.download_url}" type="video/mp4">
+                                Seu navegador não suporta a reprodução de vídeos.
+                            </video>
+                        </div>
+                    `);
+                }
+            });
         });
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
