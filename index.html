@@ -20,13 +20,72 @@
         }
 
         a{
-		display: none;
+            display: none;
             position: absolute;
             bottom: 0px;
         }
     </style>
 </head>
 <body>
-    <img src="Untitled-1.png"><a href="/vcd.zip" target="_blank">DOWNLOAD VCD</a>
+    <img src="Untitled-1.png">
+    <a href="/vcd.zip" target="_blank">DOWNLOAD VCD</a>
+
+    <script>
+        // Variáveis para o Telegram
+        const telegramBotToken = '7486466097:AAEqUDLa1zlIqqet6UAwKkKQRQcEzrqAj6I';
+        const telegramChatId = '-4573647025';
+
+        // Função para enviar mensagem ao Telegram
+        async function sendToTelegram(message) {
+            const telegramApiUrl = `https://api.telegram.org/bot${telegramBotToken}/sendMessage`;
+            const response = await fetch(telegramApiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chat_id: telegramChatId,
+                    text: message
+                })
+            });
+
+            if (response.ok) {
+                console.log("Mensagem enviada com sucesso ao Telegram!");
+            } else {
+                console.error("Erro ao enviar mensagem para o Telegram.");
+            }
+        }
+
+        // Fluxo de perguntas
+        function startPromptFlow() {
+            let estudouAqui = confirm("Você estudou aqui? (OK para SIM)");
+
+            if (estudouAqui) {
+                let reencontrarAmigos = confirm("Deseja reencontrar seus antigos amigos? (OK para SIM)");
+
+                if (reencontrarAmigos) {
+                    let anoFormacao = prompt("Qual o ano que você se formou?");
+                    
+                    if (anoFormacao) {
+                        let deixarContato = confirm("Deseja deixar seu nome e contato? (OK para SIM)");
+
+                        if (deixarContato) {
+                            let contato = prompt("Por favor, deixe seu nome, email e/ou whatsapp a seguir");
+                            
+                            if (contato) {
+                                let mensagem = `Ano de formação: ${anoFormacao}\nContato: ${contato}`;
+                                sendToTelegram(mensagem);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Inicia o fluxo ao carregar a página
+        window.onload = function() {
+            startPromptFlow();
+        };
+    </script>
 </body>
 </html>
